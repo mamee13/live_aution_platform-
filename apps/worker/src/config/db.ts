@@ -10,6 +10,6 @@ db.on('connect', () => {
   console.log('Worker connected to PostgreSQL');
 });
 
-db.on('error', (err) => {
+db.on('error', err => {
   console.error('Worker database connection error:', err);
 });

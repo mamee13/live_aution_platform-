@@ -20,12 +20,12 @@ class LoadTester {
 
   async start() {
     console.log(`Starting load test with ${this.config.numClients} clients`);
-    
+
     // Create clients
     for (let i = 0; i < this.config.numClients; i++) {
       const client = io(this.config.serverUrl);
       this.clients.push(client);
-      
+
       client.on('connect', () => {
         client.emit('join-auction', this.config.auctionId);
       });
@@ -43,11 +43,11 @@ class LoadTester {
     const bidInterval = setInterval(() => {
       const randomClient = this.clients[Math.floor(Math.random() * this.clients.length)];
       const bidAmount = Math.floor(Math.random() * 1000) + 100;
-      
+
       randomClient.emit('place-bid', {
         auctionId: this.config.auctionId,
         amount: bidAmount,
-        userId: `user-${Math.floor(Math.random() * 100)}`
+        userId: `user-${Math.floor(Math.random() * 100)}`,
       });
     }, this.config.bidInterval);
 
@@ -63,7 +63,7 @@ class LoadTester {
     console.log(`- Successful bids: ${this.bidCount}`);
     console.log(`- Errors: ${this.errors}`);
     console.log(`- Clients: ${this.clients.length}`);
-    
+
     this.clients.forEach(client => client.disconnect());
   }
 }
@@ -74,7 +74,7 @@ const config: LoadTestConfig = {
   numClients: 50,
   auctionId: 'test-auction-id',
   bidInterval: 100, // 100ms between bids
-  testDuration: 30000 // 30 seconds
+  testDuration: 30000, // 30 seconds
 };
 
 const tester = new LoadTester(config);

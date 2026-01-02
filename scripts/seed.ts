@@ -1,7 +1,8 @@
 import { Pool } from 'pg';
 
 const db = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://auction_user:auction_pass@localhost:5432/auction_db'
+  connectionString:
+    process.env.DATABASE_URL || 'postgresql://auction_user:auction_pass@localhost:5432/auction_db',
 });
 
 async function seedDatabase() {
@@ -12,7 +13,7 @@ async function seedDatabase() {
     const users = [
       { username: 'alice', email: 'alice@example.com', password_hash: 'hashed_password_1' },
       { username: 'bob', email: 'bob@example.com', password_hash: 'hashed_password_2' },
-      { username: 'charlie', email: 'charlie@example.com', password_hash: 'hashed_password_3' }
+      { username: 'charlie', email: 'charlie@example.com', password_hash: 'hashed_password_3' },
     ];
 
     for (const user of users) {
@@ -24,9 +25,13 @@ async function seedDatabase() {
 
     // Create sample items
     const items = [
-      { name: 'Vintage Watch', description: 'A beautiful vintage watch from the 1950s', category: 'accessories' },
+      {
+        name: 'Vintage Watch',
+        description: 'A beautiful vintage watch from the 1950s',
+        category: 'accessories',
+      },
       { name: 'Rare Book', description: 'First edition of a classic novel', category: 'books' },
-      { name: 'Antique Vase', description: 'Ming dynasty ceramic vase', category: 'antiques' }
+      { name: 'Antique Vase', description: 'Ming dynasty ceramic vase', category: 'antiques' },
     ];
 
     const itemIds = [];
@@ -44,27 +49,35 @@ async function seedDatabase() {
       {
         title: 'Vintage Watch Auction',
         description: 'Bidding for a rare vintage timepiece',
-        starting_price: 100.00,
+        starting_price: 100.0,
         start_time: now,
         end_time: new Date(now.getTime() + 24 * 60 * 60 * 1000), // 24 hours from now
         status: 'active',
-        item_id: itemIds[0]
+        item_id: itemIds[0],
       },
       {
         title: 'Rare Book Sale',
         description: 'First edition book auction',
-        starting_price: 50.00,
+        starting_price: 50.0,
         start_time: now,
         end_time: new Date(now.getTime() + 12 * 60 * 60 * 1000), // 12 hours from now
         status: 'active',
-        item_id: itemIds[1]
-      }
+        item_id: itemIds[1],
+      },
     ];
 
     for (const auction of auctions) {
       await db.query(
         'INSERT INTO auctions (title, description, starting_price, start_time, end_time, status, item_id) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-        [auction.title, auction.description, auction.starting_price, auction.start_time, auction.end_time, auction.status, auction.item_id]
+        [
+          auction.title,
+          auction.description,
+          auction.starting_price,
+          auction.start_time,
+          auction.end_time,
+          auction.status,
+          auction.item_id,
+        ]
       );
     }
 

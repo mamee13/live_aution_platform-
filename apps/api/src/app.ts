@@ -15,7 +15,7 @@ export const createApp = () => {
   app.use('/api/auctions', auctionRoutes);
   app.use('/api/items', itemRoutes);
 
-  app.get('/health', (req, res) => {
+  app.get('/health', (_req, res) => {
     res.json({ status: 'ok' });
   });
 

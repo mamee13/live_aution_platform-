@@ -1,4 +1,3 @@
-import { Job } from 'bullmq';
 import { db } from '../config/db';
 import { redis } from '../config/redis';
 
@@ -6,8 +5,8 @@ interface CloseAuctionJobData {
   auctionId: string;
 }
 
-export const closeAuctionJob = async (job: Job<CloseAuctionJobData>) => {
-  const { auctionId } = job.data;
+export const closeAuctionJob = async (jobData: CloseAuctionJobData) => {
+  const { auctionId } = jobData;
 
   try {
     // Get final bid information from Redis
@@ -24,11 +23,7 @@ export const closeAuctionJob = async (job: Job<CloseAuctionJobData>) => {
       WHERE id = $3
     `;
 
-    await db.query(updateQuery, [
-      finalBid ? parseFloat(finalBid) : null,
-      winnerId,
-      auctionId
-    ]);
+    await db.query(updateQuery, [finalBid ? parseFloat(finalBid) : null, winnerId, auctionId]);
 
     // Clean up Redis keys
     await redis.del(

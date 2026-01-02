@@ -9,6 +9,6 @@ db.on('connect', () => {
   console.log('Connected to PostgreSQL');
 });
 
-db.on('error', (err) => {
+db.on('error', err => {
   console.error('Database connection error:', err);
 });

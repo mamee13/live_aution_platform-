@@ -9,10 +9,10 @@ export const SocketEvents = {
   BID_ERROR: 'bid-error',
   AUCTION_ENDED: 'auction-ended',
   USER_JOINED: 'user-joined',
-  USER_LEFT: 'user-left'
+  USER_LEFT: 'user-left',
 } as const;
 
 export const JobTypes = {
-  PERSIST_BID: 'bid-persist',
-  CLOSE_AUCTION: 'auction-close'
+  PERSIST_BID: 'bid_persist',
+  CLOSE_AUCTION: 'auction_close',
 } as const;

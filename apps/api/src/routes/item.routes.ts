@@ -2,12 +2,12 @@ import { Router } from 'express';
 
 export const itemRoutes = Router();
 
-itemRoutes.get('/', (req, res) => {
+itemRoutes.get('/', (_req, res) => {
   // TODO: Implement get items logic
   res.json({ message: 'Get items endpoint' });
 });
 
-itemRoutes.post('/', (req, res) => {
+itemRoutes.post('/', (_req, res) => {
   // TODO: Implement create item logic
   res.json({ message: 'Create item endpoint' });
 });

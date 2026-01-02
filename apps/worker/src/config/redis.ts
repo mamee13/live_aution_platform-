@@ -8,6 +8,6 @@ redis.on('connect', () => {
   console.log('Worker connected to Redis');
 });
 
-redis.on('error', (err) => {
+redis.on('error', err => {
   console.error('Worker Redis connection error:', err);
 });

@@ -3,7 +3,7 @@ import { auctionService } from '../services/auction.service';
 
 export const auctionRoutes = Router();
 
-auctionRoutes.get('/', async (req, res) => {
+auctionRoutes.get('/', async (_req, res) => {
   try {
     const auctions = await auctionService.getActiveAuctions();
     res.json(auctions);
