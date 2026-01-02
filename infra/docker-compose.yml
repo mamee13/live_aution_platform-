@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: auction_db
+      POSTGRES_USER: auction_user
+      POSTGRES_PASSWORD: auction_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  api:
+    build: ../apps/api
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://auction_user:auction_pass@postgres:5432/auction_db
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: development
+    depends_on:
+      - redis
+      - postgres
+
+  worker:
+    build: ../apps/worker
+    environment:
+      DATABASE_URL: postgresql://auction_user:auction_pass@postgres:5432/auction_db
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: development
+    depends_on:
+      - redis
+      - postgres
+
+volumes:
+  redis_data:
+  postgres_data:
