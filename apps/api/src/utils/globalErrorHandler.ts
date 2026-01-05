@@ -1,7 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from './AppError';
 
-export const globalErrorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
+interface MongoError extends Error {
+  code?: number;
+  errors?: Record<string, { message: string }>;
+}
+
+export const globalErrorHandler = (
+  err: Error,
+  _req: Request,
+  res: Response,
+  _next: NextFunction
+) => {
   let error = { ...err };
   error.message = err.message;
 
@@ -15,14 +25,17 @@ export const globalErrorHandler = (err: Error, req: Request, res: Response, next
   }
 
   // Mongoose duplicate key
-  if ((err as any).code === 11000) {
+  if ((err as MongoError).code === 11000) {
     const message = 'Duplicate field value entered';
     error = new AppError(message, 400);
   }
 
   // Mongoose validation error
   if (err.name === 'ValidationError') {
-    const message = Object.values((err as any).errors).map((val: any) => val.message);
+    const mongoErr = err as MongoError;
+    const message = mongoErr.errors
+      ? Object.values(mongoErr.errors).map(val => val.message)
+      : ['Validation error'];
     error = new AppError(message.join('. '), 400);
   }
 

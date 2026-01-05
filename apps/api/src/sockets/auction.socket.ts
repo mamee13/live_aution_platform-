@@ -1,7 +1,6 @@
 import { Socket, Server } from 'socket.io';
 import { bidService } from '../services/bid.service';
 import { queueService } from '../services/queue.service';
-import { AppError } from '../utils';
 
 export const setupAuctionSocket = (socket: Socket, io: Server) => {
   socket.on('join-auction', (auctionId: string) => {
@@ -49,31 +48,29 @@ export const setupAuctionSocket = (socket: Socket, io: Server) => {
 
       const result = await bidService.placeBid(data.auctionId, data.userId, data.amount);
 
-      // Broadcast new bid to all users in the auction room
-      io.to(`auction-${data.auctionId}`).emit('new-bid', {
-        auctionId: data.auctionId,
-        amount: data.amount,
-        userId: data.userId,
-        timestamp: new Date(),
-      });
+      if (result.success) {
+        // Broadcast new bid to all users in the auction room
+        io.to(`auction-${data.auctionId}`).emit('new-bid', {
+          auctionId: data.auctionId,
+          amount: data.amount,
+          userId: data.userId,
+          timestamp: new Date(),
+        });
 
-      // Queue job to persist bid to database
-      await queueService.addBidPersistJob({
-        auctionId: data.auctionId,
-        userId: data.userId,
-        amount: data.amount,
-        timestamp: Date.now(),
-      });
+        // Queue job to persist bid to database
+        await queueService.addBidPersistJob({
+          auctionId: data.auctionId,
+          userId: data.userId,
+          amount: data.amount,
+          timestamp: Date.now(),
+        });
 
-      socket.emit('bid-success', { message: 'Bid placed successfully' });
+        socket.emit('bid-success', { message: 'Bid placed successfully' });
+      }
     } catch (error) {
       console.error('Error placing bid:', error);
-
-      if (error instanceof AppError) {
-        socket.emit('bid-error', { message: error.message });
-      } else {
-        socket.emit('bid-error', { message: 'Failed to place bid' });
-      }
+      const errorMessage = error instanceof Error ? error.message : 'Failed to place bid';
+      socket.emit('bid-error', { message: errorMessage });
     }
   });
 };
