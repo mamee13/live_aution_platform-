@@ -1,4 +1,5 @@
 import { redis } from '../config/redis';
+import { AppError } from '../utils';
 
 interface BidJobData {
   auctionId: string;
@@ -18,7 +19,7 @@ class QueueService {
       console.log(`Added bid persist job for auction ${jobData.auctionId}`);
     } catch (error) {
       console.error('Error adding bid persist job:', error);
-      throw error;
+      throw new AppError('Failed to add bid persist job', 500);
     }
   }
 
@@ -36,7 +37,7 @@ class QueueService {
       }
     } catch (error) {
       console.error('Error adding auction close job:', error);
-      throw error;
+      throw new AppError('Failed to add auction close job', 500);
     }
   }
 
@@ -45,7 +46,7 @@ class QueueService {
       return await redis.llen(`queue:${queueName}`);
     } catch (error) {
       console.error(`Error getting queue length for ${queueName}:`, error);
-      return 0;
+      throw new AppError(`Failed to get queue length for ${queueName}`, 500);
     }
   }
 
@@ -55,7 +56,7 @@ class QueueService {
       console.log(`Cleared queue: ${queueName}`);
     } catch (error) {
       console.error(`Error clearing queue ${queueName}:`, error);
-      throw error;
+      throw new AppError(`Failed to clear queue ${queueName}`, 500);
     }
   }
 }

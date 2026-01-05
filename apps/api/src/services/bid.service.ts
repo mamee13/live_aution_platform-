@@ -1,6 +1,7 @@
 import { redis } from '../config/redis';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { AppError } from '../utils';
 
 class BidService {
   private placeBidScript: string;
@@ -30,22 +31,30 @@ class BidService {
       if (result === 1) {
         return { success: true, message: 'Bid placed successfully' };
       } else {
-        return { success: false, error: 'Bid amount too low' };
+        throw new AppError('Bid amount too low', 400);
       }
     } catch (error) {
       console.error('Error placing bid:', error);
-      return { success: false, error: 'Failed to place bid' };
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError('Failed to place bid', 500);
     }
   }
 
   async getCurrentBid(auctionId: string) {
-    const currentBid = await redis.get(`auction:${auctionId}:current_bid`);
-    const highestBidder = await redis.get(`auction:${auctionId}:highest_bidder`);
+    try {
+      const currentBid = await redis.get(`auction:${auctionId}:current_bid`);
+      const highestBidder = await redis.get(`auction:${auctionId}:highest_bidder`);
 
-    return {
-      amount: currentBid ? parseFloat(currentBid) : 0,
-      bidderId: highestBidder,
-    };
+      return {
+        amount: currentBid ? parseFloat(currentBid) : 0,
+        bidderId: highestBidder,
+      };
+    } catch (error) {
+      console.error('Error getting current bid:', error);
+      throw new AppError('Failed to get current bid', 500);
+    }
   }
 }
 

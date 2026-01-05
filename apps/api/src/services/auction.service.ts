@@ -1,6 +1,7 @@
 import { db } from '../config/db';
 import { redis } from '../config/redis';
 import { bidService } from './bid.service';
+import { AppError } from '../utils';
 
 class AuctionService {
   async getActiveAuctions() {
@@ -18,7 +19,7 @@ class AuctionService {
     const result = await db.query(query, [auctionId]);
 
     if (result.rows.length === 0) {
-      throw new Error('Auction not found');
+      throw new AppError('Auction not found', 404);
     }
 
     const auction = result.rows[0];
@@ -31,6 +32,21 @@ class AuctionService {
   }
 
   async placeBid(auctionId: string, userId: string, amount: number) {
+    // First check if auction exists and is active
+    const auction = await this.getAuctionById(auctionId);
+
+    if (auction.status !== 'active') {
+      throw new AppError('Auction is not active', 400);
+    }
+
+    if (new Date(auction.end_time) <= new Date()) {
+      throw new AppError('Auction has ended', 400);
+    }
+
+    if (amount <= auction.currentBid) {
+      throw new AppError('Bid amount must be higher than current bid', 400);
+    }
+
     return await bidService.placeBid(auctionId, userId, amount);
   }
 }

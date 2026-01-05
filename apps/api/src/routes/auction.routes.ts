@@ -1,32 +1,62 @@
 import { Router } from 'express';
 import { auctionService } from '../services/auction.service';
+import { catchAsync, AppError } from '../utils';
 
 export const auctionRoutes = Router();
 
-auctionRoutes.get('/', async (_req, res) => {
-  try {
+auctionRoutes.get(
+  '/',
+  catchAsync(async (_req, res, next) => {
     const auctions = await auctionService.getActiveAuctions();
-    res.json(auctions);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch auctions' });
-  }
-});
 
-auctionRoutes.get('/:id', async (req, res) => {
-  try {
-    const auction = await auctionService.getAuctionById(req.params.id);
-    res.json(auction);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch auction' });
-  }
-});
+    res.json({
+      success: true,
+      data: auctions,
+    });
+  })
+);
 
-auctionRoutes.post('/:id/bid', async (req, res) => {
-  try {
+auctionRoutes.get(
+  '/:id',
+  catchAsync(async (req, res, next) => {
+    const { id } = req.params;
+
+    if (!id) {
+      return next(new AppError('Auction ID is required', 400));
+    }
+
+    const auction = await auctionService.getAuctionById(id);
+
+    res.json({
+      success: true,
+      data: auction,
+    });
+  })
+);
+
+auctionRoutes.post(
+  '/:id/bid',
+  catchAsync(async (req, res, next) => {
+    const { id } = req.params;
     const { amount, userId } = req.body;
-    const result = await auctionService.placeBid(req.params.id, userId, amount);
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to place bid' });
-  }
-});
+
+    if (!id) {
+      return next(new AppError('Auction ID is required', 400));
+    }
+
+    if (!amount || !userId) {
+      return next(new AppError('Amount and userId are required', 400));
+    }
+
+    if (typeof amount !== 'number' || amount <= 0) {
+      return next(new AppError('Amount must be a positive number', 400));
+    }
+
+    const result = await auctionService.placeBid(id, userId, amount);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  })
+);
