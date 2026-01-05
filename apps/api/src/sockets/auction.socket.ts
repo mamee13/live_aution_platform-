@@ -1,6 +1,5 @@
 import { Socket, Server } from 'socket.io';
 import { bidService } from '../services/bid.service';
-import { queueService } from '../services/queue.service';
 
 export const setupAuctionSocket = (socket: Socket, io: Server) => {
   socket.on('join-auction', (auctionId: string) => {
@@ -46,6 +45,7 @@ export const setupAuctionSocket = (socket: Socket, io: Server) => {
         return;
       }
 
+      // Place bid (this now handles both Redis update and job enqueueing)
       const result = await bidService.placeBid(data.auctionId, data.userId, data.amount);
 
       if (result.success) {
@@ -55,17 +55,13 @@ export const setupAuctionSocket = (socket: Socket, io: Server) => {
           amount: data.amount,
           userId: data.userId,
           timestamp: new Date(),
+          bidId: result.bidId,
         });
 
-        // Queue job to persist bid to database
-        await queueService.addBidPersistJob({
-          auctionId: data.auctionId,
-          userId: data.userId,
-          amount: data.amount,
-          timestamp: Date.now(),
+        socket.emit('bid-success', {
+          message: 'Bid placed successfully',
+          bidId: result.bidId,
         });
-
-        socket.emit('bid-success', { message: 'Bid placed successfully' });
       }
     } catch (error) {
       console.error('Error placing bid:', error);
