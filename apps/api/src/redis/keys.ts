@@ -10,8 +10,4 @@ export const RedisKeys = {
 
   // Session keys
   userSession: (sessionId: string) => `session:${sessionId}`,
-
-  // Job queues
-  bidPersistQueue: 'queue:bid_persist',
-  auctionCloseQueue: 'queue:auction_close',
 };

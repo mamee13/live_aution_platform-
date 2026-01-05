@@ -13,6 +13,5 @@ export const REDIS_TTL = {
 
 export const QUEUE_NAMES = {
   BID_PERSIST: 'bid_persist',
-  AUCTION_CLOSE: 'auction_close',
-  AUCTION_CLOSE_SCHEDULED: 'auction_close_scheduled',
+  AUCTION_LIFECYCLE: 'auction_lifecycle',
 } as const;

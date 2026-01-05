@@ -2,6 +2,8 @@ import { redis } from '../config/redis';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { AppError } from '../utils';
+import { queueService } from './queueService';
+import { v4 as uuidv4 } from 'uuid';
 
 class BidService {
   private placeBidScript: string;
@@ -18,7 +20,9 @@ class BidService {
       `auction:${auctionId}:bid_count`,
     ];
 
-    const args = [userId, amount.toString(), Date.now().toString()];
+    const bidId = uuidv4();
+    const timestamp = new Date();
+    const args = [userId, amount.toString(), timestamp.getTime().toString()];
 
     try {
       const result = (await redis.eval(
@@ -29,7 +33,16 @@ class BidService {
       )) as number;
 
       if (result === 1) {
-        return { success: true, message: 'Bid placed successfully' };
+        // Enqueue bid persistence job
+        await queueService.enqueueBidPersist({
+          auctionId,
+          userId,
+          amount,
+          timestamp,
+          bidId,
+        });
+
+        return { success: true, message: 'Bid placed successfully', bidId };
       } else {
         throw new AppError('Bid amount too low', 400);
       }

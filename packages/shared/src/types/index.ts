@@ -32,3 +32,22 @@ export interface Item {
   imageUrl?: string;
   category: string;
 }
+
+// BullMQ Job Data Types
+export interface PersistBidJobData {
+  auctionId: string;
+  userId: string;
+  amount: number;
+  timestamp: Date;
+  bidId: string;
+}
+
+export interface StartAuctionJobData {
+  auctionId: string;
+  startTime: Date;
+}
+
+export interface EndAuctionJobData {
+  auctionId: string;
+  endTime: Date;
+}

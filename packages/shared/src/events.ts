@@ -13,6 +13,7 @@ export const SocketEvents = {
 } as const;
 
 export const JobTypes = {
-  PERSIST_BID: 'bid_persist',
-  CLOSE_AUCTION: 'auction_close',
+  PERSIST_BID: 'persist_bid',
+  START_AUCTION: 'start_auction',
+  END_AUCTION: 'end_auction',
 } as const;
